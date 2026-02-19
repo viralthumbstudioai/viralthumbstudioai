@@ -11,7 +11,7 @@ export default async function handler(req: Request) {
     }
 
     try {
-        const { prompt, aspectRatio } = await req.json();
+        const { prompt: userPrompt, aspectRatio } = await req.json();
 
         if (!process.env.GEMINI_API_KEY) {
             return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), { status: 500 });
@@ -19,50 +19,54 @@ export default async function handler(req: Request) {
 
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.0-flash', // Using generic model that supports images or specific image model if available
-            contents: { parts: [{ text: prompt }] },
-            // Note: standard Gemini models might not support 'imageConfig' in this SDK version uniformly, 
-            // check specific model capabilities. For now assuming text-to-image or similar capability if supported by SDK/Model.
-            // If using Imagen:
-            // model: 'imagen-3.0-generate-001'
-            // But user was using 'gemini-2.5-flash-image' which might be a preview.
-            // Falling back to the model user was using but ensuring it works on server.
+        // 1. ENHANCE PROMPT (Make it "YouTube Style")
+        // We use a fast text model for this.
+        const enhancementModel = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const enhancementPrompt = `
+        You are an expert YouTube Thumbnail Designer. 
+         rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
+        
+        Rules:
+        - Make it high contrast, vibrant, and eye-catching (4k, ultra detailed).
+        - Focus on facial expressions (shocked, happy, curious) if people are involved.
+        - Add lighting effects (neon, rim lighting, dramatic shadows).
+        - Keep the subject clear and center.
+        - Output ONLY the raw prompt text, no explanations.
+
+        User Prompt: "${userPrompt}"
+        `;
+
+        const enhancementRes = await enhancementModel.generateContent(enhancementPrompt);
+        const enhancedPrompt = enhancementRes.response.text();
+
+        console.log("Enhanced Prompt:", enhancedPrompt); // For debugging in Vercel logs
+
+        // 2. GENERATE IMAGE
+        // We use the Imagen 3 model (via Gemini API) for high quality images.
+        // Note: Check available models. 'imagen-3.0-generate-001' is common for this.
+        const imageModel = ai.getGenerativeModel({ model: 'imagen-3.0-generate-001' });
+
+        const imageRes = await imageModel.generateContent({
+            contents: [{ parts: [{ text: enhancedPrompt }] }],
         });
 
-        // For image generation specifically, we might need to adjust based on the exact model availability.
-        // Assuming the user's previous code worked with 'gemini-2.5-flash-image', we'll try to stick to it or a known working one.
-        // However, 'gemini-2.0-flash' is a safe bet for text. For images, we need to be careful.
-        // Let's stick to the user's model ID if it was working for them, or 'gemini-2.0-flash' if it supports images.
-        // Actually, let's use a standard model for now.
-
-        // REVISITING USER CODE: User used 'gemini-2.5-flash-image'.
-        // I will use that for consistency.
-
-        const imgRes = await ai.models.generateContent({
-            model: 'gemini-2.0-flash', // safest bet for now
-            contents: { parts: [{ text: prompt }] },
-            // generationConfig: { ... } 
-        });
-
-        // NOTE: The Google Gen AI SDK for Node/Edge might handle responses differently.
-        // We need to parse correctly.
-        const part = imgRes.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        const part = imageRes.response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
 
         if (part?.inlineData) {
             return new Response(JSON.stringify({
-                imageUrl: `data:image/png;base64,${part.inlineData.data}`
+                imageUrl: `data:image/png;base64,${part.inlineData.data}`,
+                enhancedPrompt: enhancedPrompt // Sending back so user can see it
             }), {
                 headers: { 'Content-Type': 'application/json' },
             });
         } else {
-            // Mocking for now if model doesn't return image (common in text-only models)
-            // In a real scenario, we must use an image-generation model.
+            console.error("No image data in response:", JSON.stringify(imageRes));
             return new Response(JSON.stringify({ error: 'No image generated' }), { status: 500 });
         }
 
-    } catch (error) {
-        console.error(error);
-        return new Response(JSON.stringify({ error: 'Failed to generate thumbnail' }), { status: 500 });
+    } catch (error: any) {
+        console.error("API Error:", error);
+        return new Response(JSON.stringify({ error: error.message || 'Failed to generate thumbnail' }), { status: 500 });
     }
 }

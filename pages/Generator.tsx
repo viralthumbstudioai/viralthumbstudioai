@@ -160,18 +160,20 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
     setIsGenerating(true);
     setStatusMsg(`Construindo em formato ${selectedRatio}...`);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const prompt = `Professional YouTube thumbnail photography. Subject: "${selectedTitle}". Ultra-detailed, no text. Professional lighting.`;
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: { parts: [{ text: prompt }] },
-        config: { imageConfig: { aspectRatio: selectedRatio as any } }
+      const response = await fetch('/api/generate-thumbnail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `Subject: "${selectedTitle}". Ultra-detailed, no text. Professional lighting.`,
+          aspectRatio: selectedRatio
+        })
       });
 
-      const part = response.candidates[0].content.parts.find(p => p.inlineData);
-      if (part?.inlineData) {
-        onComplete(`data:image/png;base64,${part.inlineData.data}`, selectedTitle);
+      if (!response.ok) throw new Error('Failed to generate image');
+
+      const data = await response.json();
+      if (data.imageUrl) {
+        onComplete(data.imageUrl, selectedTitle);
       }
     } catch (e) {
       console.error(e);

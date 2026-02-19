@@ -150,6 +150,24 @@ const App: React.FC = () => {
               <img src="https://www.google.com/favicon.ico" className="size-4" />
               Entrar com Google
             </button>
+
+            {/* Developer Bypass - Only shows in development */}
+            {import.meta.env.DEV && (
+              <button
+                onClick={() => {
+                  setSession({
+                    user: {
+                      id: 'dev-user-id',
+                      email: 'dev@example.com',
+                      user_metadata: { name: 'Developer' }
+                    }
+                  });
+                }}
+                className="mt-4 text-xs text-slate-500 hover:text-white underline"
+              >
+                [DEV] Acessar sem Login
+              </button>
+            )}
           </div>
         </div>
       );
