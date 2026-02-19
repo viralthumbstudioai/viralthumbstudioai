@@ -1,0 +1,7 @@
+{
+  "name": "Viral Thumb Studio IA",
+  "description": "Uma suíte de criação e otimização de thumbnails para o YouTube baseada em IA, com previsão de viralidade, remoção de fundo e testes A/B.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
