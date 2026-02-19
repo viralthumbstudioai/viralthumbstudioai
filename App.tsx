@@ -120,7 +120,7 @@ const App: React.FC = () => {
             <p className="text-slate-400 text-sm mb-6 leading-relaxed">As variáveis de ambiente <b>SUPABASE_URL</b> e <b>SUPABASE_ANON_KEY</b> não foram detectadas.</p>
             <div className="text-left bg-black/40 p-4 rounded-xl mb-10 text-[10px] text-slate-500 font-mono">
               1. Vá ao Painel do Supabase<br />
-                 2. Project Settings > API<br />
+              2. Project Settings &gt; API<br />
               3. Adicione as chaves na Vercel
             </div>
             <button
