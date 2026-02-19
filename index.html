@@ -1,13 +1,15 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viral Thumb Studio IA</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -50,36 +52,71 @@
         }
     </script>
     <style>
-        body { font-family: 'Spline Sans', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3f2348; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #bd2bee; }
+        body {
+            font-family: 'Spline Sans', sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3f2348;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bd2bee;
+        }
 
         .layer-build {
             animation: layer-reveal 4s infinite;
         }
+
         @keyframes layer-reveal {
-            0%, 100% { opacity: 0.1; transform: scale(0.95); }
-            50% { opacity: 0.8; transform: scale(1); }
+
+            0%,
+            100% {
+                opacity: 0.1;
+                transform: scale(0.95);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
         }
 
         .glitch-text {
             animation: glitch 1s infinite linear alternate-reverse;
         }
+
         @keyframes glitch {
-            0% { text-shadow: -2px 0 #bd2bee; }
-            50% { text-shadow: 2px 0 #39ff14; }
-            100% { text-shadow: -1px 0 #bd2bee; }
+            0% {
+                text-shadow: -2px 0 #bd2bee;
+            }
+
+            50% {
+                text-shadow: 2px 0 #39ff14;
+            }
+
+            100% {
+                text-shadow: -1px 0 #bd2bee;
+            }
         }
 
         .pattern-grid {
             background-color: #0a050d;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(63, 35, 72, 0.2) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(63, 35, 72, 0.2) 1px, transparent 1px);
             background-size: 40px 40px;
         }
+
         .pattern-grid::before {
             content: '';
             position: absolute;
@@ -88,21 +125,13 @@
             pointer-events: none;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.40.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
+
+    <link rel="stylesheet" href="/index.css">
 </head>
+
 <body class="bg-background-dark text-white font-display overflow-hidden">
     <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
