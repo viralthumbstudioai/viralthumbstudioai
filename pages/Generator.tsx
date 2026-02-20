@@ -156,11 +156,11 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const imagePromises = strategies.map(async (strat: any) => {
         const imgPrompt = `YouTube thumbnail professional photography. Subject: "${topic}". Style: Cinematic, ultra-sharp focus. Note: Generate only the background image, NO TEXT. No graphical letters. Focus on mood: ${strat.trigger}.`;
 
-        // Use Pollinations.ai
+        // Use Pollinations.ai (Default model for stability)
         const encodedPrompt = encodeURIComponent(imgPrompt);
         const width = selectedRatio === '16:9' ? 1920 : selectedRatio === '9:16' ? 1080 : 1080;
         const height = selectedRatio === '16:9' ? 1080 : selectedRatio === '9:16' ? 1920 : 1080;
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random() * 1000)}`;
 
         return {
           imageUrl: imageUrl,
