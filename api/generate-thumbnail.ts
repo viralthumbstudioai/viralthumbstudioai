@@ -20,18 +20,10 @@ export default async function handler(req: Request) {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
         // 1. ENHANCE PROMPT (Make it "YouTube Style")
-<<<<<<< HEAD
-        // We use a fast text model for this.
-        const enhancementModel = ai.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-        const enhancementPrompt = `
-=======
-        // 1. ENHANCE PROMPT (Make it "YouTube Style")
         // We use a fast text model for this.
         const enhancementRes = await ai.models.generateContent({
             model: 'gemini-1.5-flash',
             contents: `
->>>>>>> 2f43193 (1)
         You are an expert YouTube Thumbnail Designer. 
          rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
         
@@ -43,39 +35,22 @@ export default async function handler(req: Request) {
         - Output ONLY the raw prompt text, no explanations.
 
         User Prompt: "${userPrompt}"
-<<<<<<< HEAD
-        `;
-
-        const enhancementRes = await enhancementModel.generateContent(enhancementPrompt);
-        const enhancedPrompt = enhancementRes.response.text();
-=======
         `
         });
-        
+
         const enhancedPrompt = enhancementRes.text() || userPrompt;
->>>>>>> 2f43193 (1)
 
         console.log("Enhanced Prompt:", enhancedPrompt); // For debugging in Vercel logs
 
         // 2. GENERATE IMAGE
         // We use the Imagen 3 model (via Gemini API) for high quality images.
         // Note: Check available models. 'imagen-3.0-generate-001' is common for this.
-<<<<<<< HEAD
-        const imageModel = ai.getGenerativeModel({ model: 'imagen-3.0-generate-001' });
-
-        const imageRes = await imageModel.generateContent({
-            contents: [{ parts: [{ text: enhancedPrompt }] }],
-        });
-
-        const part = imageRes.response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-=======
         const imageRes = await ai.models.generateContent({
             model: 'imagen-3.0-generate-001',
             contents: { parts: [{ text: enhancedPrompt }] },
         });
 
         const part = imageRes.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
->>>>>>> 2f43193 (1)
 
         if (part?.inlineData) {
             return new Response(JSON.stringify({
