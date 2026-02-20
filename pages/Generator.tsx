@@ -104,7 +104,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
 
       let strategies = [];
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout (increased for reliability)
 
       try {
         const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
@@ -130,9 +130,9 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
         console.error("Values Generation Failed (Using Fallback):", error);
         // Fallback strategies if AI fails
         strategies = [
-          { headline: "IMPERDÍVEL", trigger: "Curiosidade", palette: { name: "Padrão", colors: ["#FF0000"], strategy: "Contraste" } },
-          { headline: "SEGREDO", trigger: "Choque", palette: { name: "Dark", colors: ["#000000"], strategy: "Misterio" } },
-          { headline: "AGORA", trigger: "Urgência", palette: { name: "Neon", colors: ["#00FF00"], strategy: "Tech" } }
+          { headline: "ERRO NA IA", trigger: "Tente Novamente", palette: { name: "Padrão", colors: ["#FF0000"], strategy: "Contraste" } },
+          { headline: "TIMEOUT", trigger: "Tente Novamente", palette: { name: "Dark", colors: ["#000000"], strategy: "Misterio" } },
+          { headline: "FALHA", trigger: "Tente Novamente", palette: { name: "Neon", colors: ["#00FF00"], strategy: "Tech" } }
         ];
       }
 
