@@ -85,41 +85,36 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
     setFastScaleResults([]);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-
-      const strategyResponse = await ai.models.generateContent({
-        model: 'gemini-2.0-flash', // Reverted to gemini-2.0-flash (Available)
-        contents: `Analise o título: "${topic}". Crie 3 variantes estratégicas para thumbnail.
-        Idioma de saída: ${language}.
-        REGRAS CRÍTICAS DE TEXTO:
-        - A "headline" deve estar escrita com GRAFIA 100% CORRETA, sem erros.
-        - Idioma: ${language}.
-        - Máximo 3 palavras por headline.
-        Retorne como JSON Array.`,
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.ARRAY,
-            items: {
-              type: Type.OBJECT,
-              properties: {
-                headline: { type: Type.STRING },
-                trigger: { type: Type.STRING },
-                palette: {
-                  type: Type.OBJECT,
-                  properties: {
-                    name: { type: Type.STRING },
-                    colors: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    strategy: { type: Type.STRING }
-                  }
-                }
-              }
-            }
-          }
+      // Use Pollinations Text API for Strategy Generation
+      const promptText = `Analise o título: "${topic}". Crie 3 variantes estratégicas para thumbnail.
+      Idioma de saída: ${language}.
+      REGRAS CRÍTICAS DE TEXTO:
+      - A "headline" deve estar escrita com GRAFIA 100% CORRETA, sem erros.
+      - Idioma: ${language}.
+      - Máximo 3 palavras por headline.
+      - Retorne APENAS um JSON válido.
+      Exemplo de formato:
+      [
+        {
+          "headline": "TEXTO AQUI",
+          "trigger": "curiosidade",
+          "palette": { "name": "Vibrante", "colors": ["#FF0000"], "strategy": "Alto Contraste" }
         }
-      });
+      ]`;
 
-      const strategies = JSON.parse(strategyResponse.text || '[]');
+      const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`);
+      const text = await response.text();
+
+      // Extract JSON from potential code blocks
+      const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      let strategies = [];
+      try {
+        strategies = JSON.parse(cleanText);
+      } catch (e) {
+        console.warn("JSON Parse Retry", e);
+        const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
+        strategies = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+      }
 
       setStatusMsg('Materializando visuais de alta retenção...');
       const imagePromises = strategies.map(async (strat: any) => {
