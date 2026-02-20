@@ -102,18 +102,44 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
         }
       ]`;
 
-      const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`);
-      const text = await response.text();
-
-      // Extract JSON from potential code blocks
-      const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
       let strategies = [];
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+
       try {
-        strategies = JSON.parse(cleanText);
-      } catch (e) {
-        console.warn("JSON Parse Retry", e);
-        const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
-        strategies = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error("Pollinations API Error");
+
+        const text = await response.text();
+
+        // Extract JSON from potential code blocks
+        const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+
+        try {
+          strategies = JSON.parse(cleanText);
+        } catch (e) {
+          console.warn("JSON Parse Retry", e);
+          const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
+          strategies = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+        }
+      } catch (error) {
+        console.error("Values Generation Failed (Using Fallback):", error);
+        // Fallback strategies if AI fails
+        strategies = [
+          { headline: "IMPERDÍVEL", trigger: "Curiosidade", palette: { name: "Padrão", colors: ["#FF0000"], strategy: "Contraste" } },
+          { headline: "SEGREDO", trigger: "Choque", palette: { name: "Dark", colors: ["#000000"], strategy: "Misterio" } },
+          { headline: "AGORA", trigger: "Urgência", palette: { name: "Neon", colors: ["#00FF00"], strategy: "Tech" } }
+        ];
+      }
+
+      if (!strategies || strategies.length === 0) {
+        strategies = [
+          { headline: "AUTO-GERADO", trigger: "Padrão", palette: { name: "Padrão", colors: ["#0000FF"], strategy: "Simples" } }
+        ];
       }
 
       setStatusMsg('Materializando visuais de alta retenção...');
