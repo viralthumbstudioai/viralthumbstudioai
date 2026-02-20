@@ -331,6 +331,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                           alt={res.headline}
                           className="w-full h-full"
                           onImageLoaded={(url) => setValidImageUrls(prev => ({ ...prev, [i]: url }))}
+                          onImageError={() => setValidImageUrls(prev => ({ ...prev, [i]: 'https://images.unsplash.com/photo-1626544827763-d516dce335ca?q=80&w=1200&auto=format&fit=crop' }))}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
                         <div className="absolute bottom-4 left-6 right-6">
@@ -395,6 +396,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                       alt={selectedTitle}
                       className="w-full h-full"
                       onImageLoaded={(url) => setValidImageUrls(prev => ({ ...prev, 'single': url }))}
+                      onImageError={() => setValidImageUrls(prev => ({ ...prev, 'single': 'https://images.unsplash.com/photo-1626544827763-d516dce335ca?q=80&w=1200&auto=format&fit=crop' }))}
                     />
                   </div>
                   <div className="p-8 flex items-center justify-between">
@@ -407,7 +409,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                       disabled={!validImageUrls['single']}
                       className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 px-8 rounded-2xl transition-all shadow-xl shadow-primary/30 uppercase tracking-widest"
                     >
-                      {validImageUrls['single'] ? 'Editar Agora' : 'Carregando...'}
+                      {validImageUrls['single'] ? window.location.href.includes('unsplash') ? 'Usar Placeholder' : 'Editar Agora' : 'Carregando...'}
                     </button>
                   </div>
                 </div>

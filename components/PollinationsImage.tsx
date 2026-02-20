@@ -10,6 +10,7 @@ interface PollinationsImageProps {
     nologo?: boolean;
     seed?: number;
     onImageLoaded?: (url: string) => void;
+    onImageError?: () => void;
 }
 
 const MODELS = ['flux', 'turbo', 'osm']; // Priority: Quality -> Speed -> Fallback
@@ -60,6 +61,7 @@ const PollinationsImage: React.FC<PollinationsImageProps> = ({
             // All models failed
             setHasError(true);
             setIsLoading(false);
+            if (onImageError) onImageError();
         }
     };
 
