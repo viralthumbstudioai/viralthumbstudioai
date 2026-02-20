@@ -199,29 +199,13 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
 
   const generateThumbnailIA = async () => {
     setIsGenerating(true);
-    setStatusMsg(`Construindo em formato ${selectedRatio}...`);
-    try {
-      const response = await fetch('/api/generate-thumbnail', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `Subject: "${selectedTitle}". Ultra-detailed, no text. Professional lighting.`,
-          aspectRatio: selectedRatio
-        })
-      });
+    setStatusMsg(`Iniciando Geração Neural...`);
 
-      if (!response.ok) throw new Error('Failed to generate image');
-
-      const data = await response.json();
-      if (data.imageUrl) {
-        onComplete(data.imageUrl, selectedTitle);
-      }
-    } catch (e) {
-      console.error(e);
-      setStatusMsg('Erro ao gerar imagem.');
-    } finally {
+    // Simply transition to result step, let PollinationsImage component handle the rest
+    setTimeout(() => {
+      setStep('result');
       setIsGenerating(false);
-    }
+    }, 1500);
   };
 
   // Added handleFileUpload to handle manual image selection from the user's device
@@ -395,6 +379,37 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                     <span className="material-symbols-outlined text-slate-400 text-5xl mb-4">cloud_upload</span>
                     <span className="text-white font-black uppercase text-xs">Subir Minha Foto</span>
                   </button>
+                </div>
+              </div>
+            )}
+
+            {step === 'result' && (
+              <div className="animate-in fade-in zoom-in-95 duration-700 max-w-4xl mx-auto">
+                <div className="bg-surface-dark border border-white/5 rounded-[3rem] overflow-hidden flex flex-col">
+                  <div className="aspect-video relative overflow-hidden bg-black">
+                    {/* Use the last generated single image URL (which we store in validImageUrls['single']) */}
+                    <PollinationsImage
+                      prompt={`Subject: "${selectedTitle}". Ultra-detailed, no text. Professional lighting.`}
+                      width={selectedRatio === '16:9' ? 1280 : selectedRatio === '9:16' ? 720 : 1080}
+                      height={selectedRatio === '16:9' ? 720 : selectedRatio === '9:16' ? 1280 : 1080}
+                      alt={selectedTitle}
+                      className="w-full h-full"
+                      onImageLoaded={(url) => setValidImageUrls(prev => ({ ...prev, 'single': url }))}
+                    />
+                  </div>
+                  <div className="p-8 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-black text-white italic uppercase tracking-tighter mb-2">Resultado IA</h3>
+                      <p className="text-slate-400 text-xs">Se a imagem estiver carregando, aguarde a otimização automática.</p>
+                    </div>
+                    <button
+                      onClick={() => onComplete(validImageUrls['single'], selectedTitle)}
+                      disabled={!validImageUrls['single']}
+                      className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-4 px-8 rounded-2xl transition-all shadow-xl shadow-primary/30 uppercase tracking-widest"
+                    >
+                      {validImageUrls['single'] ? 'Editar Agora' : 'Carregando...'}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
