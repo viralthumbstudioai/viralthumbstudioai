@@ -128,9 +128,11 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
         }
       } catch (error) {
         console.error("Values Generation Failed (Using Smart Fallback):", error);
+      }
 
-        // SMART LOCAL FALLBACK (No API needed)
-        // This ensures the user ALWAYS sees valid results even if AI is dead.
+      // UNIFIED SMART FALLBACK
+      // If strategies is empty (API failed or JSON parse failed), use local context-aware version.
+      if (!strategies || strategies.length === 0) {
         strategies = [
           {
             headline: "IMPERDÍVEL",
@@ -147,15 +149,6 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
             trigger: `Solução para ${topic}`,
             palette: { name: "Futurista", colors: ["#00FF00", "#000000"], strategy: "Neon" }
           }
-        ];
-      }
-
-      // Safety check: Ensure we never return an empty list
-      if (!strategies || strategies.length === 0) {
-        strategies = [
-          { headline: "AUTO A", trigger: "Opção 1", palette: { name: "Padrão", colors: ["#FF0000"], strategy: "Simple" } },
-          { headline: "AUTO B", trigger: "Opção 2", palette: { name: "Padrão", colors: ["#00FF00"], strategy: "Simple" } },
-          { headline: "AUTO C", trigger: "Opção 3", palette: { name: "Padrão", colors: ["#0000FF"], strategy: "Simple" } }
         ];
       }
 
