@@ -88,7 +88,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
       const strategyResponse = await ai.models.generateContent({
-        model: 'gemini-2.0-flash', // Updated to stable model
+        model: 'gemini-1.5-flash', // Switched to 1.5-flash for stability
         contents: `Analise o título: "${topic}". Crie 3 variantes estratégicas para thumbnail.
         Idioma de saída: ${language}.
         REGRAS CRÍTICAS DE TEXTO:
@@ -126,12 +126,12 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
         const imgPrompt = `YouTube thumbnail professional photography. Subject: "${topic}". Style: Cinematic, ultra-sharp focus. Note: Generate only the background image, NO TEXT. No graphical letters. Focus on mood: ${strat.trigger}.`;
 
         const imgRes = await ai.models.generateContent({
-          model: 'imagen-3.0-generate-001', // Updated to stable image model
+          model: 'imagen-3.0-generate-001',
           contents: { parts: [{ text: imgPrompt }] },
           config: { imageConfig: { aspectRatio: selectedRatio as any } }
         });
 
-        const part = imgRes.candidates[0].content.parts.find(p => p.inlineData);
+        const part = imgRes.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
         return {
           imageUrl: part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
           headline: strat.headline,
@@ -143,9 +143,9 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const generatedResults = await Promise.all(imagePromises);
       setFastScaleResults(generatedResults);
       setStep('fast-scale-results');
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Erro na Escala Rápida. Tente novamente.");
+      alert(`Erro na Escala Rápida: ${e.message || e.toString()}`);
     } finally {
       setIsGenerating(false);
     }
