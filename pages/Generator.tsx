@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { Language } from '../types';
-import PollinationsImage from "../components/PollinationsImage";
+import AIImage from "../components/AIImage";
 
 interface FastScaleResult {
   imageUrl: string;
@@ -311,7 +311,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                   {fastScaleResults.map((res, i) => (
                     <div key={i} className="group bg-surface-dark border border-white/5 rounded-[3rem] overflow-hidden flex flex-col transition-all hover:border-primary/50 hover:scale-[1.02]">
                       <div className="aspect-video relative overflow-hidden bg-black">
-                        <PollinationsImage
+                        <AIImage
                           prompt={`youtube thumbnail background ${res.trigger} 8k resolution`}
                           width={1280}
                           height={720}
@@ -376,7 +376,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                 <div className="bg-surface-dark border border-white/5 rounded-[3rem] overflow-hidden flex flex-col">
                   <div className="aspect-video relative overflow-hidden bg-black">
                     {/* Use the last generated single image URL (which we store in validImageUrls['single']) */}
-                    <PollinationsImage
+                    <AIImage
                       prompt={`Subject: "${selectedTitle}". Ultra-detailed, no text. Professional lighting.`}
                       width={selectedRatio === '16:9' ? 1280 : selectedRatio === '9:16' ? 720 : 1080}
                       height={selectedRatio === '16:9' ? 720 : selectedRatio === '9:16' ? 1280 : 1080}
