@@ -88,7 +88,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
       const strategyResponse = await ai.models.generateContent({
-        model: 'gemini-pro', // Switched to gemini-pro (stable)
+        model: 'gemini-2.0-flash', // Reverted to gemini-2.0-flash (Available)
         contents: `Analise o título: "${topic}". Crie 3 variantes estratégicas para thumbnail.
         Idioma de saída: ${language}.
         REGRAS CRÍTICAS DE TEXTO:

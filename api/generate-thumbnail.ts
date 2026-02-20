@@ -22,7 +22,7 @@ export default async function handler(req: Request) {
         // 1. ENHANCE PROMPT (Make it "YouTube Style")
         // We use a fast text model for this.
         const enhancementRes = await ai.models.generateContent({
-            model: 'gemini-1.5-flash',
+            model: 'gemini-2.0-flash', // Reverted to gemini-2.0-flash
             contents: `
         You are an expert YouTube Thumbnail Designer. 
          rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.

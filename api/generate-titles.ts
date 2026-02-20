@@ -20,7 +20,7 @@ export default async function handler(req: Request) {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
         const response = await ai.models.generateContent({
-            model: "gemini-pro", // Switched to gemini-pro (stable)
+            model: "gemini-2.0-flash", // Reverted to gemini-2.0-flash
             contents: `Gere 5 títulos de vídeo do YouTube virais e intrigantes para o tópico: "${topic}". 
       Idioma: ${language || 'pt-BR'}.
       REGRAS CRÍTICAS: 
