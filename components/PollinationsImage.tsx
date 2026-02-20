@@ -9,6 +9,7 @@ interface PollinationsImageProps {
     alt: string;
     nologo?: boolean;
     seed?: number;
+    onImageLoaded?: (url: string) => void;
 }
 
 const MODELS = ['flux', 'turbo', 'osm']; // Priority: Quality -> Speed -> Fallback
@@ -62,6 +63,7 @@ const PollinationsImage: React.FC<PollinationsImageProps> = ({
 
     const handleLoad = () => {
         setIsLoading(false);
+        if (onImageLoaded) onImageLoaded(imgUrl);
     };
 
     return (

@@ -30,7 +30,7 @@ const LANGUAGES: { id: Language, label: string, flag: string }[] = [
 ];
 
 const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onComplete, onCancel }) => {
-  const [step, setStep] = useState<'topic' | 'title' | 'image-choice' | 'fast-scale-results'>('topic');
+  const [step, setStep] = useState<'topic' | 'title' | 'image-choice' | 'style' | 'result' | 'fast-scale-results'>('topic');
   const [topic, setTopic] = useState('');
   const [language, setLanguage] = useState<Language>('pt-BR');
   const [titles, setTitles] = useState<string[]>([]);
@@ -39,6 +39,8 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
   const [fastScaleResults, setFastScaleResults] = useState<FastScaleResult[]>([]);
+  // Store valid URLs that successfully loaded
+  const [validImageUrls, setValidImageUrls] = useState<Record<string, string>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -344,6 +346,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                           height={720}
                           alt={res.headline}
                           className="w-full h-full"
+                          onImageLoaded={(url) => setValidImageUrls(prev => ({ ...prev, [i]: url }))}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
                         <div className="absolute bottom-4 left-6 right-6">
@@ -354,10 +357,11 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                       <div className="p-8 flex flex-col flex-1">
                         <p className="text-slate-300 text-[11px] leading-relaxed italic mb-6">"{res.palette.strategy}"</p>
                         <button
-                          onClick={() => onComplete(res.imageUrl, res.headline)}
-                          className="w-full bg-primary py-4 rounded-2xl text-[10px] font-black uppercase text-white shadow-lg"
+                          onClick={() => onComplete(validImageUrls[i] || res.imageUrl, res.headline)}
+                          disabled={!validImageUrls[i]}
+                          className="w-full bg-primary py-4 rounded-2xl text-[10px] font-black uppercase text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          Editar este Bundle
+                          {validImageUrls[i] ? 'Editar este Bundle' : 'Carregando...'}
                         </button>
                       </div>
                     </div>
