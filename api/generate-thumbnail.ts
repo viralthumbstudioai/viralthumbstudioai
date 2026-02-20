@@ -64,7 +64,7 @@ export default async function handler(req: Request) {
         if (aspectRatio === '9:16') { width = 720; height = 1280; }
         else if (aspectRatio === '1:1') { width = 1080; height = 1080; }
 
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random() * 1000)}`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}`;
 
         return new Response(JSON.stringify({
             imageUrl: imageUrl, // Direct URL to image

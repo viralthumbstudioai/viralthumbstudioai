@@ -168,7 +168,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
         const encodedPrompt = encodeURIComponent(finalPrompt);
         const width = selectedRatio === '16:9' ? 1280 : selectedRatio === '9:16' ? 720 : 1080;
         const height = selectedRatio === '16:9' ? 720 : selectedRatio === '9:16' ? 1280 : 1080;
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random() * 1000)}&t=${Date.now()}`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}&t=${Date.now()}`;
 
         return {
           imageUrl: imageUrl,
