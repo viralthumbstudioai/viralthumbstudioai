@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import { Language } from '../types';
+import PollinationsImage from "../components/PollinationsImage";
 
 interface FastScaleResult {
   imageUrl: string;
@@ -337,21 +338,14 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                   {fastScaleResults.map((res, i) => (
                     <div key={i} className="group bg-surface-dark border border-white/5 rounded-[3rem] overflow-hidden flex flex-col transition-all hover:border-primary/50 hover:scale-[1.02]">
                       <div className="aspect-video relative overflow-hidden bg-black">
-                        <img
-                          src={res.imageUrl}
-                          className="w-full h-full object-cover"
-                          alt="Option"
-                          referrerPolicy="no-referrer"
-                          crossOrigin="anonymous"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.nextElementSibling?.classList.remove('hidden');
-                          }}
+                        <PollinationsImage
+                          prompt={`youtube thumbnail background ${res.trigger} 8k resolution`}
+                          width={1280}
+                          height={720}
+                          alt={res.headline}
+                          className="w-full h-full"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
-                        <div className="hidden absolute inset-0 flex items-center justify-center bg-red-900/50 text-white font-bold p-4 text-center border-2 border-red-500">
-                          ERRO AO CARREGAR IMAGEM
-                        </div>
                         <div className="absolute bottom-4 left-6 right-6">
                           <h4 className="text-white font-black text-2xl leading-none uppercase tracking-tighter italic">{res.headline}</h4>
                         </div>
