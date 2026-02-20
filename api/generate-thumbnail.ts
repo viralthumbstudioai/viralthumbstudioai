@@ -13,17 +13,9 @@ export default async function handler(req: Request) {
     try {
         const { prompt: userPrompt, aspectRatio } = await req.json();
 
-        if (!process.env.GEMINI_API_KEY) {
-            return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), { status: 500 });
-        }
-
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
         // 1. ENHANCE PROMPT (Make it "YouTube Style")
-        // We use a fast text model for this.
-        const enhancementRes = await ai.models.generateContent({
-            model: 'gemini-2.0-flash', // Reverted to gemini-2.0-flash
-            contents: `
+        // We use Pollinations Text API (OpenAI compatible model) for this.
+        const promptText = `
         You are an expert YouTube Thumbnail Designer. 
          rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
         
@@ -35,10 +27,10 @@ export default async function handler(req: Request) {
         - Output ONLY the raw prompt text, no explanations.
 
         User Prompt: "${userPrompt}"
-        `
-        });
+        `;
 
-        const enhancedPrompt = enhancementRes.text() || userPrompt;
+        const enhancementRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`);
+        const enhancedPrompt = await enhancementRes.text();
 
         console.log("Enhanced Prompt:", enhancedPrompt); // For debugging in Vercel logs
 
