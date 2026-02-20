@@ -42,27 +42,22 @@ export default async function handler(req: Request) {
 
         console.log("Enhanced Prompt:", enhancedPrompt); // For debugging in Vercel logs
 
-        // 2. GENERATE IMAGE
-        // We use the Imagen 3 model (via Gemini API) for high quality images.
-        // Note: Check available models. 'imagen-3.0-generate-001' is common for this.
-        const imageRes = await ai.models.generateContent({
-            model: 'imagen-3.0-generate-001',
-            contents: { parts: [{ text: enhancedPrompt }] },
+        // 2. GENERATE IMAGE (POLLINATIONS.AI - FREE & UNLIMTED)
+        const encodedPrompt = encodeURIComponent(enhancedPrompt);
+        let width = 1920;
+        let height = 1080;
+
+        if (aspectRatio === '9:16') { width = 1080; height = 1920; }
+        else if (aspectRatio === '1:1') { width = 1080; height = 1080; }
+
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}`;
+
+        return new Response(JSON.stringify({
+            imageUrl: imageUrl, // Direct URL to image
+            enhancedPrompt: enhancedPrompt
+        }), {
+            headers: { 'Content-Type': 'application/json' },
         });
-
-        const part = imageRes.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-
-        if (part?.inlineData) {
-            return new Response(JSON.stringify({
-                imageUrl: `data:image/png;base64,${part.inlineData.data}`,
-                enhancedPrompt: enhancedPrompt // Sending back so user can see it
-            }), {
-                headers: { 'Content-Type': 'application/json' },
-            });
-        } else {
-            console.error("No image data in response:", JSON.stringify(imageRes));
-            return new Response(JSON.stringify({ error: 'No image generated' }), { status: 500 });
-        }
 
     } catch (error: any) {
         console.error("API Error:", error);

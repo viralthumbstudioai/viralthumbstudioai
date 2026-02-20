@@ -88,7 +88,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
       const strategyResponse = await ai.models.generateContent({
-        model: 'gemini-1.5-flash', // Switched to 1.5-flash for stability
+        model: 'gemini-pro', // Switched to gemini-pro (stable)
         contents: `Analise o título: "${topic}". Crie 3 variantes estratégicas para thumbnail.
         Idioma de saída: ${language}.
         REGRAS CRÍTICAS DE TEXTO:
@@ -125,15 +125,14 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const imagePromises = strategies.map(async (strat: any) => {
         const imgPrompt = `YouTube thumbnail professional photography. Subject: "${topic}". Style: Cinematic, ultra-sharp focus. Note: Generate only the background image, NO TEXT. No graphical letters. Focus on mood: ${strat.trigger}.`;
 
-        const imgRes = await ai.models.generateContent({
-          model: 'imagen-3.0-generate-001',
-          contents: { parts: [{ text: imgPrompt }] },
-          config: { imageConfig: { aspectRatio: selectedRatio as any } }
-        });
+        // Use Pollinations.ai
+        const encodedPrompt = encodeURIComponent(imgPrompt);
+        const width = selectedRatio === '16:9' ? 1920 : selectedRatio === '9:16' ? 1080 : 1080;
+        const height = selectedRatio === '16:9' ? 1080 : selectedRatio === '9:16' ? 1920 : 1080;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}`;
 
-        const part = imgRes.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
         return {
-          imageUrl: part?.inlineData ? `data:image/png;base64,${part.inlineData.data}` : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
+          imageUrl: imageUrl,
           headline: strat.headline,
           trigger: strat.trigger,
           palette: strat.palette
