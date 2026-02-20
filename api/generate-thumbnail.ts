@@ -11,28 +11,41 @@ export default async function handler(req: Request) {
     }
 
     try {
-        const { prompt: userPrompt, aspectRatio } = await req.json();
-
         // 1. ENHANCE PROMPT (Make it "YouTube Style")
-        // We use Pollinations Text API (OpenAI compatible model) for this.
-        const promptText = `
-        You are an expert YouTube Thumbnail Designer. 
-         rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
-        
-        Rules:
-        - Make it high contrast, vibrant, and eye-catching (4k, ultra detailed).
-        - Focus on facial expressions (shocked, happy, curious) if people are involved.
-        - Add lighting effects (neon, rim lighting, dramatic shadows).
-        - Keep the subject clear and center.
-        - Output ONLY the raw prompt text, no explanations.
+        let enhancedPrompt = userPrompt;
+        try {
+            const promptText = `
+            You are an expert YouTube Thumbnail Designer. 
+             rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
+            
+            Rules:
+            - Hyper-realistic and viral YouTube thumbnail style, high contrast, ultra-detailed 8k. 
+            - A central charismatic subject with an intense, expressive facial expression (wide-eyed shock or a confident smirk). 
+            - Sharp rim lighting and vibrant neon glows (electric blue, fiery orange, or toxic green) to separate the subject from the background. 
+            - The background is a clean, cinematic environment related to the theme.
+            - Dynamic composition with a shallow depth of field.
+            - Output ONLY the raw prompt text, no explanations.
 
-        User Prompt: "${userPrompt}"
-        `;
+            User Prompt: "${userPrompt}"
+            `;
 
-        const enhancementRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`);
-        const enhancedPrompt = await enhancementRes.text();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
-        console.log("Enhanced Prompt:", enhancedPrompt); // For debugging in Vercel logs
+            const enhancementRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (enhancementRes.ok) {
+                const text = await enhancementRes.text();
+                if (text && text.length > 10) enhancedPrompt = text.trim();
+            }
+        } catch (e) {
+            console.error("Prompt Enhancement Failed (Using raw prompt):", e);
+        }
+
+        console.log("Final Prompt:", enhancedPrompt);
 
         // 2. GENERATE IMAGE (POLLINATIONS.AI - FREE & UNLIMTED)
         const encodedPrompt = encodeURIComponent(enhancedPrompt);
