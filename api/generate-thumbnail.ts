@@ -15,36 +15,43 @@ export default async function handler(req: Request) {
 
         // 1. ENHANCE PROMPT (Make it "YouTube Style")
         let enhancedPrompt = userPrompt;
+
+        // Strategy: Try Gemini 2.0 Flash -> Pollinations -> Raw Prompt
         try {
-            const promptText = `
-            You are an expert YouTube Thumbnail Designer. 
-             rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
-            
-            Rules:
-            - Hyper-realistic and viral YouTube thumbnail style, high contrast, ultra-detailed 8k. 
-            - A central charismatic subject with an intense, expressive facial expression (wide-eyed shock or a confident smirk). 
-            - Sharp rim lighting and vibrant neon glows (electric blue, fiery orange, or toxic green) to separate the subject from the background. 
-            - The background is a clean, cinematic environment related to the theme.
-            - Dynamic composition with a shallow depth of field.
-            - Output ONLY the raw prompt text, no explanations.
-
-            User Prompt: "${userPrompt}"
-            `;
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
-
-            const enhancementRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
-                signal: controller.signal
+            // A. Try Gemini
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+            const enhancementRes = await ai.models.generateContent({
+                model: 'gemini-2.0-flash',
+                contents: `
+                You are an expert YouTube Thumbnail Designer. 
+                rewrite the following user prompt into a high-quality image generation prompt for a viral YouTube thumbnail.
+                ... (keep rules same) ...
+                User Prompt: "${userPrompt}"
+                `
             });
-            clearTimeout(timeoutId);
+            const text = enhancementRes.text();
+            if (text) enhancedPrompt = text.trim();
+        } catch (geminiError) {
+            console.error("Gemini Enhancement Failed, trying Pollinations...", geminiError);
 
-            if (enhancementRes.ok) {
-                const text = await enhancementRes.text();
-                if (text && text.length > 10) enhancedPrompt = text.trim();
+            // B. Try Pollinations
+            try {
+                const promptText = `Rewrite this prompt for a viral YouTube thumbnail (high contrast, 8k, detailed): "${userPrompt}"`;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+                const enhancementRes = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (enhancementRes.ok) {
+                    const text = await enhancementRes.text();
+                    if (text && text.length > 10) enhancedPrompt = text.trim();
+                }
+            } catch (pollinationsError) {
+                console.error("All enhancement failed, using raw prompt.", pollinationsError);
             }
-        } catch (e) {
-            console.error("Prompt Enhancement Failed (Using raw prompt):", e);
         }
 
         console.log("Final Prompt:", enhancedPrompt);

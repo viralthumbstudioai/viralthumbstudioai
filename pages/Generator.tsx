@@ -103,31 +103,36 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       ]`;
 
       let strategies = [];
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout (increased for reliability)
 
+      // 1. Try Google Gemini (Best Quality)
       try {
-        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
-          signal: controller.signal
+        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+        const strategyResponse = await ai.models.generateContent({
+          model: 'gemini-2.0-flash',
+          contents: promptText,
+          config: { responseMimeType: "application/json" }
         });
-        clearTimeout(timeoutId);
+        strategies = JSON.parse(strategyResponse.text || '[]');
+      } catch (geminiError) {
+        console.warn("Gemini Failed, trying Pollinations...", geminiError);
 
-        if (!response.ok) throw new Error("Pollinations API Error");
-
-        const text = await response.text();
-
-        // Extract JSON from potential code blocks
-        const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-
+        // 2. Try Pollinations (Backup)
         try {
-          strategies = JSON.parse(cleanText);
-        } catch (e) {
-          console.warn("JSON Parse Retry", e);
-          const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
-          strategies = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
+          const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (response.ok) {
+            const text = await response.text();
+            const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
+            strategies = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+          }
+        } catch (pollinationsError) {
+          console.error("Pollinations also failed:", pollinationsError);
         }
-      } catch (error) {
-        console.error("Values Generation Failed (Using Smart Fallback):", error);
       }
 
       // UNIFIED SMART FALLBACK
@@ -156,11 +161,11 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       const imagePromises = strategies.map(async (strat: any) => {
         const imgPrompt = `YouTube thumbnail professional photography. Subject: "${topic}". Style: Cinematic, ultra-sharp focus. Note: Generate only the background image, NO TEXT. No graphical letters. Focus on mood: ${strat.trigger}.`;
 
-        // Use Pollinations.ai (Default model for stability)
+        // Use Pollinations.ai (Turbo model for speed/reliability)
         const encodedPrompt = encodeURIComponent(imgPrompt);
         const width = selectedRatio === '16:9' ? 1920 : selectedRatio === '9:16' ? 1080 : 1080;
         const height = selectedRatio === '16:9' ? 1080 : selectedRatio === '9:16' ? 1920 : 1080;
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random() * 1000)}`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=turbo&seed=${Math.floor(Math.random() * 1000)}`;
 
         return {
           imageUrl: imageUrl,
