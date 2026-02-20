@@ -56,12 +56,21 @@ const PollinationsImage: React.FC<PollinationsImageProps> = ({
             const nextIndex = currentModelIndex + 1;
             setCurrentModelIndex(nextIndex);
             setIsLoading(true);
-            setTimeout(() => generateUrl(nextIndex), 500); // Small delay before retry
+            setTimeout(() => generateUrl(nextIndex), 500);
         } else {
-            // All models failed
-            setHasError(true);
-            setIsLoading(false);
-            if (onImageError) onImageError();
+            // All AI models failed. Use Ultimate Fallback (Placeholder)
+            // This ensures onImageLoaded eventally fires and user is not stuck.
+            console.warn("All AI models failed. Switching to fallback placeholder.");
+            // Prevent infinite loop if placeholder itself fails (unlikely but possible)
+            if (imgUrl.includes('unsplash')) {
+                setHasError(true);
+                setIsLoading(false);
+                if (onImageError) onImageError();
+                return;
+            }
+
+            setImgUrl('https://images.unsplash.com/photo-1626544827763-d516dce335ca?q=80&w=1200&auto=format&fit=crop');
+            // We rely on the <img> onLoad to trigger the success state
         }
     };
 
@@ -103,7 +112,7 @@ const PollinationsImage: React.FC<PollinationsImageProps> = ({
                         <span className="material-symbols-outlined text-red-500 text-3xl mb-2">broken_image</span>
                         <p className="text-white text-xs font-bold uppercase">Falha na Geração</p>
                         <button
-                            onClick={() => { setCurrentModelIndex(0); generateUrl(0); }}
+                            onClick={() => { setHasError(false); setCurrentModelIndex(0); setIsLoading(true); generateUrl(0); }}
                             className="mt-3 text-[10px] bg-red-500/20 hover:bg-red-500/40 text-white px-3 py-1 rounded transition-colors uppercase"
                         >
                             Tentar Novamente
