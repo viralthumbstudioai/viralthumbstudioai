@@ -11,6 +11,8 @@ export default async function handler(req: Request) {
     }
 
     try {
+        const { prompt: userPrompt, aspectRatio } = await req.json();
+
         // 1. ENHANCE PROMPT (Make it "YouTube Style")
         let enhancedPrompt = userPrompt;
         try {
