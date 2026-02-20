@@ -21,27 +21,29 @@ const PollinationsImage: React.FC<PollinationsImageProps> = ({
     className,
     alt,
     nologo = true,
-    seed = Math.floor(Math.random() * 1000)
+    seed
 }) => {
+    // Stabilize seed: use prop if provided, otherwise generate ONCE and keep it.
+    const [stableSeed] = useState(seed || Math.floor(Math.random() * 1000));
+
     const [currentModelIndex, setCurrentModelIndex] = useState(0);
     const [imgUrl, setImgUrl] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [hasError, setHasError] = useState(false);
-    const [retryCount, setRetryCount] = useState(0);
 
     useEffect(() => {
-        // Reset state when prompt changes
+        // Reset state when prompt changes (but NOT when parent re-renders)
         setCurrentModelIndex(0);
         setHasError(false);
         setIsLoading(true);
         generateUrl(0);
-    }, [prompt, width, height, seed]);
+    }, [prompt, width, height, stableSeed]);
 
     const generateUrl = (modelIndex: number) => {
         const model = MODELS[modelIndex];
         // Clean prompt to avoid URL breaking characters
         const safePrompt = encodeURIComponent(prompt.slice(0, 200).replace(/[^a-zA-Z0-9 ]/g, ""));
-        const url = `https://image.pollinations.ai/prompt/${safePrompt}?width=${width}&height=${height}&model=${model}&nologo=${nologo}&seed=${seed}&t=${Date.now()}`;
+        const url = `https://image.pollinations.ai/prompt/${safePrompt}?width=${width}&height=${height}&model=${model}&nologo=${nologo}&seed=${stableSeed}&t=${Date.now()}`;
         setImgUrl(url);
     };
 
