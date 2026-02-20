@@ -56,25 +56,36 @@ export default async function handler(req: Request) {
 
         console.log("Final Prompt:", enhancedPrompt);
 
-        // 2. GENERATE IMAGE (POLLINATIONS.AI - FREE & UNLIMTED)
-        const encodedPrompt = encodeURIComponent(enhancedPrompt.slice(0, 200));
-        let width = 1280;
-        let height = 720;
-
-        if (aspectRatio === '9:16') { width = 720; height = 1280; }
-        else if (aspectRatio === '1:1') { width = 1080; height = 1080; }
-
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}`;
-
-        return new Response(JSON.stringify({
-            imageUrl: imageUrl, // Direct URL to image
-            enhancedPrompt: enhancedPrompt
-        }), {
-            headers: { 'Content-Type': 'application/json' },
+        // 2. GENERATE IMAGE (GOOGLE IMAGEN)
+        console.log("Generating image with Google GenAI...");
+        // Re-instantiate AI for this scope to ensure availability
+        const googleAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        const imageResponse = await googleAI.models.generateContent({
+            model: 'imagine-3-generation', // Using the latest available Imagen model or similar
+            contents: {
+                parts: [{ text: `YouTube thumbnail background: ${enhancedPrompt}. Cinematic, high quality, 8k, detailed, NO TEXT.` }]
+            },
+            config: {
+                imageConfig: {
+                    aspectRatio: aspectRatio === '9:16' ? '9:16' : aspectRatio === '1:1' ? '1:1' : '16:9',
+                    sampleCount: 1
+                }
+            }
         });
 
-    } catch (error: any) {
+        // Extract Base64 Image
+        const part = imageResponse.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (!part?.inlineData?.data) {
+            throw new Error("Failed to generate image with Google AI");
+        }
+
+        const imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+
+        return new Response(JSON.stringify({ imageUrl, prompt: enhancedPrompt }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
         console.error("API Error:", error);
-        return new Response(JSON.stringify({ error: error.message || 'Failed to generate thumbnail' }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'Internal Server Error' }), { status: 500 });
     }
 }

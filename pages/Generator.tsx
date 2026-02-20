@@ -161,27 +161,14 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
       }
 
       setStatusMsg('Materializando visuais de alta retenção...');
-      const imagePromises = strategies.map(async (strat: any) => {
-        // Use Pollinations.ai (Simplified for reliability)
-        // Clean prompt: just keywords, no punctuation that might break URLs
-        const simpleTopic = topic.replace(/[^a-zA-Z0-9 ]/g, "");
-        const cleanTrigger = strat.trigger.replace(/[^a-zA-Z0-9 ]/g, "");
-        const finalPrompt = `youtube thumbnail background ${simpleTopic} ${cleanTrigger} 8k resolution`;
+      // We no longer generate images here. The AIImage component handles it.
+      const generatedResults = strategies.map((strat: any) => ({
+        headline: strat.headline,
+        trigger: strat.trigger,
+        palette: strat.palette,
+        imageUrl: '' // Validated via AIImage component
+      }));
 
-        const encodedPrompt = encodeURIComponent(finalPrompt);
-        const width = selectedRatio === '16:9' ? 1280 : selectedRatio === '9:16' ? 720 : 1080;
-        const height = selectedRatio === '16:9' ? 720 : selectedRatio === '9:16' ? 1280 : 1080;
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=flux&seed=${Math.floor(Math.random() * 1000)}&t=${Date.now()}`;
-
-        return {
-          imageUrl: imageUrl,
-          headline: strat.headline,
-          trigger: strat.trigger,
-          palette: strat.palette
-        };
-      });
-
-      const generatedResults = await Promise.all(imagePromises);
       setFastScaleResults(generatedResults);
       setStep('fast-scale-results');
     } catch (e: any) {
@@ -201,7 +188,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
     setIsGenerating(true);
     setStatusMsg(`Iniciando Geração Neural...`);
 
-    // Simply transition to result step, let PollinationsImage component handle the rest
+    // Simply transition to result step, let AIImage component handle the rest
     setTimeout(() => {
       setStep('result');
       setIsGenerating(false);
