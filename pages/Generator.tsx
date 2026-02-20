@@ -165,7 +165,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
         const encodedPrompt = encodeURIComponent(imgPrompt);
         const width = selectedRatio === '16:9' ? 1920 : selectedRatio === '9:16' ? 1080 : 1080;
         const height = selectedRatio === '16:9' ? 1080 : selectedRatio === '9:16' ? 1920 : 1080;
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&model=turbo&seed=${Math.floor(Math.random() * 1000)}`;
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true&seed=${Math.floor(Math.random() * 1000)}&t=${Date.now()}`;
 
         return {
           imageUrl: imageUrl,
@@ -334,7 +334,7 @@ const Generator: React.FC<GeneratorProps> = ({ initialEntry = 'generator', onCom
                   {fastScaleResults.map((res, i) => (
                     <div key={i} className="group bg-surface-dark border border-white/5 rounded-[3rem] overflow-hidden flex flex-col transition-all hover:border-primary/50 hover:scale-[1.02]">
                       <div className="aspect-video relative overflow-hidden bg-black">
-                        <img src={res.imageUrl} className="w-full h-full object-cover" alt="Option" />
+                        <img src={res.imageUrl} className="w-full h-full object-cover" alt="Option" referrerPolicy="no-referrer" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div className="absolute bottom-4 left-6 right-6">
                           <h4 className="text-white font-black text-2xl leading-none uppercase tracking-tighter italic">{res.headline}</h4>
