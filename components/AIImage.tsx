@@ -77,6 +77,14 @@ const AIImage: React.FC<AIImageProps> = ({
                     src={imgUrl}
                     alt={alt}
                     className="w-full h-full object-cover transition-opacity duration-500"
+                    referrerPolicy="no-referrer"
+                    onError={() => {
+                        console.warn('Image failed to load in DOM');
+                        if (!imgUrl.includes('unsplash')) {
+                            setImgUrl('https://images.unsplash.com/photo-1626544827763-d516dce335ca?q=80&w=1200&auto=format&fit=crop');
+                            if (onImageLoaded) onImageLoaded('https://images.unsplash.com/photo-1626544827763-d516dce335ca?q=80&w=1200&auto=format&fit=crop');
+                        }
+                    }}
                 />
             )}
 

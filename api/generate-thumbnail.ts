@@ -61,7 +61,7 @@ export default async function handler(req: Request) {
         // Re-instantiate AI for this scope to ensure availability
         const googleAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const imageResponse = await googleAI.models.generateContent({
-            model: 'imagine-3-generation', // Using the latest available Imagen model or similar
+            model: 'gemini-2.0-flash-exp', // Using the experimental model that supports images
             contents: {
                 parts: [{ text: `YouTube thumbnail background: ${enhancedPrompt}. Cinematic, high quality, 8k, detailed, NO TEXT.` }]
             },
