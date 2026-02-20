@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+<<<<<<< HEAD
+=======
+
+.vercel
+.env*.local
+>>>>>>> 2f43193 (1)
