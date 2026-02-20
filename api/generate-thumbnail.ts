@@ -29,7 +29,7 @@ export default async function handler(req: Request) {
                 User Prompt: "${userPrompt}"
                 `
             });
-            const text = enhancementRes.text();
+            const text = enhancementRes.text; // Access as property, not function
             if (text) enhancedPrompt = text.trim();
         } catch (geminiError) {
             console.error("Gemini Enhancement Failed, trying Pollinations...", geminiError);
